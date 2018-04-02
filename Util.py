@@ -4,6 +4,7 @@ from Data import Data
 import numpy as np
 import math
 import random
+import sys
 
 def cholRank1Update(L,X):
 	for k in range(Data.D):
@@ -114,3 +115,73 @@ def printDocumentTopicDistribution(tableCountsPerDoc,numDocs,K,dirName,alpha):
 			fout.write(str(temp) + " ")
 		fout.write("\n")
 	fout.close()
+
+def printTableAssignments(tableAssignments,dirName):
+	fout = open(dirName + "tableAssignments.txt","w")
+	for i in range(len(tableAssignments)):
+		eachDoc = tableAssignments[i]
+		for assignment in eachDoc:
+			fout.write(str(assignment) + " ")
+		fout.write("\n")
+	fout.close()
+
+def calculateAvgLL(corpus,tableAssignments,dataVectors,tableMeans,tableCholeskyLTriangularMat,K,N,prior,tableCountsPerDoc):
+	N_k = [0] * K
+	for k in range(K):
+		n_k = 0
+		for n in range(N):
+			n_k += tableCountsPerDoc[k][n]
+		N_k[k] = n_k
+		if n_k == 0:
+			print "table %d is empty.....exiting"
+			sys.exit(1)
+	scalar = [0.0] * K
+	for k in range(K):
+		scalar[k] = prior.nu_0 + N_k[k] - Data.D
+
+	scaledCholeskies = []
+	for k in range(K):
+		scaledCholesky = tableCholeskyLTriangularMat[k] / math.sqrt(scalar[k])
+		scaledCholeskies.append(scaledCholesky)
+	
+	logDeterminants = []
+	for i in range(K):
+		logDet = 0.0
+		for l  in range(Data.D):
+			logDet += math.log(scaledCholeskies[i][l][l])
+		logDeterminants.append(logDet)
+
+	docCounter = 0
+	totalWordCounter = 0
+	totalLogLL = 0.0
+	for eachDoc in corpus:
+		wordCounter = 0
+		for word in eachDoc:
+			x = dataVectors[word]
+			tableId = tableAssignments[docCounter][wordCounter]
+			x_minus_mu = x - tableMeans[tableId]
+			lTriangularChol = scaledCholeskies[tableId]
+			x_minus_mu = np.linalg.solve(lTriangularChol,x_minus_mu) #questioned
+			x_minus_mu_T = x_minus_mu.T
+			mul = np.dot(x_minus_mu_T,x_minus_mu)
+			val = mul[0][0]
+			logDensity = 0.5 * (val + Data.D * math.log(2 * math.pi)) + logDeterminants[tableId])
+			totalLogLL -= logDensity
+			wordCounter += 1
+			totalWordCounter += 1
+		docCounter += 1
+	
+	avgDensity = totalLogLL / totalWordCounter
+
+	return avgDensity
+
+def getCustomerIdWordMappings(vocabFile):
+	Hmap = dict()
+	fin = open(vocabFile,"r")
+	counter = 0
+	for line in fin:
+		word = line.strip()
+		Hmap[counter] = word
+		counter += 1
+	fin.close() 
+	return Hmap
