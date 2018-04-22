@@ -8,7 +8,7 @@ import sys
 
 def cholRank1Update(L,X):
 	for k in range(Data.D):
-		r = math.sqrt(math.pow(L[k][k]),2) + math.pow(X[k][0],2)
+		r = math.sqrt(math.pow(L[k][k],2) + math.pow(X[k][0],2))
 		c = r / L[k][k]
 		s = X[k][0] / L[k][k]
 		L[k][k] = r
@@ -17,7 +17,7 @@ def cholRank1Update(L,X):
 			L[l][k] = val
 			val = c * X[l][0] - s * val
 			X[l][0] = val
-	return L,X
+	# return L,X
 
 def cholRank1Downdate(L,X):
 	for k in range(Data.D):
@@ -31,7 +31,7 @@ def cholRank1Downdate(L,X):
 			val = c * X[l][0] - s * L[l][k]
 			X[l][0] = val
 
-	return L,X
+	# return L,X
 
 def sample(probs):
 	cumulative_probs = [0.0] * len(probs)
@@ -64,7 +64,7 @@ def binSearch(cumProb,key,start,end):
 def getSampleMean(data):
 	mean = np.zeros((Data.D,1))
 	for vec in data:
-		mean += vec
+		mean = mean + vec
 	mean /= len(data)
 
 	return mean;
@@ -165,7 +165,7 @@ def calculateAvgLL(corpus,tableAssignments,dataVectors,tableMeans,tableCholeskyL
 			x_minus_mu_T = x_minus_mu.T
 			mul = np.dot(x_minus_mu_T,x_minus_mu)
 			val = mul[0][0]
-			logDensity = 0.5 * (val + Data.D * math.log(2 * math.pi)) + logDeterminants[tableId])
+			logDensity = 0.5 * (val + Data.D * math.log(2 * math.pi)) + logDeterminants[tableId]
 			totalLogLL -= logDensity
 			wordCounter += 1
 			totalWordCounter += 1

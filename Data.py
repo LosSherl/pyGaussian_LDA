@@ -6,26 +6,28 @@ import numpy as np
 class Data(object):
 	inputFileName = ""
 	D = 1
-	nVectors = 0
+	numVectors = 0
 	def __init__(self):
 		pass
 	
-	def readData(self):
-		fin = open(self.inputFileName,"r")
+	@staticmethod
+	def readData():
+		fin = open(Data.inputFileName,"r")
 		lines = []
 		for line in fin:
 			lines.append(line)
 		fin.close()
-		self.nVectors = len(lines)
-		data = np.zeros((self.nVectors,self.D))
-		for i in range(nVectors):
+		Data.numVectors = len(lines)
+		data = np.zeros((Data.numVectors,Data.D))
+		for i in range(Data.numVectors):
 			vals = lines[i].split()
-			for j in range(self.D):
+			for j in range(Data.D):
 				data[i][j] = float(vals[j])
 
 		return data
-
-	def readCorpus(self,inputCorpusName):
+	
+	@staticmethod
+	def readCorpus(inputCorpusName):
 		corpus = []
 		fin = open(inputCorpusName,"r")
 		for line in fin:
